@@ -20,7 +20,7 @@ public class Puzzle {
 	}
 	
 	public Puzzle(String filePath){
-		//TODO: open a file and parse it into a string
+		//TODO: open a file and parse it into a puzzle
 	}
 	
 	public Puzzle(int[][] values, int puzzleSize){
@@ -28,8 +28,8 @@ public class Puzzle {
 	}
 	
 	public int getBlockNumber(int x, int y){
-		int blockX = x % m_size;
-		int blockY = x % m_size;
+		int blockX = x / m_size;
+		int blockY = x / m_size;
 		
 		return m_blockLayout[blockX][blockY];	
 	}
