@@ -1,24 +1,26 @@
-package gui;
+package patterson.travis.sudoku;
 
 import javax.swing.JButton;
 
-import puzzle.Puzzle;
 
-public class Solve implements Runnable{
-	private Puzzle puzz;
+public class Solver implements Runnable{
+	private Puzzle m_puzzle;
 	private JButton solveButton;
 	
-	public Solve(Puzzle p, JButton s){
+	public Solver(Puzzle p, JButton s){
 		solveButton = s;
-		puzz = p;
+		m_puzzle = p;
 	}
 	
 	public void run() {
 		solveButton.setText("Solving");
 		solveButton.setEnabled(false);
-		//TODO: IMPLEMENT Puzzle Solving on this thread		
-		//puzz.solve();
+		solvePuzzle();
 		solveButton.setText("Solve");
 		solveButton.setEnabled(true);
+	}
+	
+	private void solvePuzzle(){
+		//TODO: Implement puzzle Solving
 	}
 }

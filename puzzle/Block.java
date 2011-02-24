@@ -1,4 +1,7 @@
 package puzzle;
+
+import patterson.travis.sudoku.Puzzle;
+
 public class Block {
 	private Tile[] members = new Tile[9];
 	private int[] candidates = new int[]{0,0,0,0,0,0,0,0,0};

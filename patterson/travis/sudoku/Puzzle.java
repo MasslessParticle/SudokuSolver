@@ -1,4 +1,4 @@
-package puzzle;
+package patterson.travis.sudoku;
 
 public class Puzzle {
 	private int[][] m_puzzle = null;	
@@ -27,9 +27,13 @@ public class Puzzle {
 		makePuzzle(values, puzzleSize);
 	}
 	
+	public int getSize(){
+		return m_size;
+	}
+	
 	public int getBlockNumber(int x, int y){
-		int blockX = x / m_size;
-		int blockY = x / m_size;
+		int blockX = x / m_numBlocks;
+		int blockY = y / m_numBlocks;
 		
 		return m_blockLayout[blockX][blockY];	
 	}
@@ -181,7 +185,7 @@ public class Puzzle {
 	}
 	
 	private void setupBlockLayout() {
-		int m_numBlocks = (int)Math.sqrt(m_size);
+		m_numBlocks = (int)Math.sqrt(m_size);
 		m_blockLayout = new int[m_numBlocks][m_numBlocks];
 		
 		int blockNumber = 0;

@@ -73,11 +73,11 @@ public class BlockPanel extends JPanel {
 	
 	private class JTextFieldLimit extends PlainDocument {
 		private static final long serialVersionUID = 1L;
-		private int limit;
+		private int m_limit;
 
 		JTextFieldLimit(int limit) {
 			super();
-			this.limit = limit;
+			m_limit = limit;
 		}
 
 		public void insertString
@@ -86,11 +86,13 @@ public class BlockPanel extends JPanel {
 						
 			if (str == null) return;
 
-			if ((getLength() + str.length()) <= limit) {
+			if ((getLength() + str.length()) <= m_limit) {
 				try{
 					if(Integer.parseInt(str) > 0)
 						super.insertString(offset, str, attr);
-				}catch (NumberFormatException n){}
+				}catch (NumberFormatException n){
+					
+				}
 			}
 		}
 	}
