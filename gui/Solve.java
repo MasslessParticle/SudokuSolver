@@ -16,7 +16,8 @@ public class Solve implements Runnable{
 	public void run() {
 		solveButton.setText("Solving");
 		solveButton.setEnabled(false);
-		puzz.solve();
+		//TODO: IMPLEMENT Puzzle Solving on this thread		
+		//puzz.solve();
 		solveButton.setText("Solve");
 		solveButton.setEnabled(true);
 	}
