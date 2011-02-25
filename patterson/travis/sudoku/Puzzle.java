@@ -138,13 +138,7 @@ public class Puzzle {
 		int[] blockCandidates = blockCandidates(getBlockNumber(x, y));
 		
 		for (int i = 0; i < candidates.length; i++){
-			if (rowCandidates[i] == 0){
-				candidates[i] = 0;
-			}
-			if (colCandidates[i] == 0){
-				candidates[i] = 0;
-			}
-			if (blockCandidates[i] == 0){
+			if (rowCandidates[i] == 0 || colCandidates[i] == 0 || blockCandidates[i] == 0 ){
 				candidates[i] = 0;
 			}
 		}
