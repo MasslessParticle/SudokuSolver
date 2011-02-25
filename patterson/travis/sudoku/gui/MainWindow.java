@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -97,6 +98,7 @@ public class MainWindow extends JFrame{
 	        if(option == JFileChooser.APPROVE_OPTION){
 	        	m_puzzle = new Puzzle(diag.getSelectedFile().getAbsolutePath());
 	        	m_gamePanel.setPuzzle(m_puzzle);
+	        	System.out.println(Arrays.toString(m_puzzle.cellCandidates(0,2)));
 	        }
 		}
 	}

@@ -73,11 +73,9 @@ public class Puzzle {
 		int[] existingValues = m_puzzleVals[x];
 		
 		for (int i = 0; i < existingValues.length; i++){
-			int cellValue = existingValues[i] - 1;
-			if (cellValue >= 0){
-				if (candidates[cellValue] != 0){
-					candidates[cellValue] = 0;
-				}
+			int cellValue = existingValues[i];
+			if (existingValues[i] != 0){
+				candidates[cellValue - 1] = 0;
 			}
 		}
 		return candidates;
@@ -87,11 +85,9 @@ public class Puzzle {
 		int[] candidates = getNewCandidateList();
 		
 		for (int i = 0; i < m_size; i ++){
-			int cellValue = m_puzzleVals[i][y] - 1;
-			if (cellValue >= 0){
-				if (cellValue != 0){
-					candidates[cellValue] = 0;
-				}
+			int cellValue = m_puzzleVals[i][y];
+			if (m_puzzleVals[i][y] != 0){
+				candidates[cellValue - 1] = 0;
 			}
 		}
 		return candidates;
@@ -119,11 +115,9 @@ public class Puzzle {
 		
 		for (int i = blockX; i < blockX + m_numBlocks; i++){
 			for (int j = blockX; j < blockX + m_numBlocks; j++){
-				int cellValue = m_puzzleVals[i][j] - 1;
-				if (cellValue >= 0){
-					if (cellValue != 0){
-						candidates[cellValue] = 0;
-					}
+				int cellValue = m_puzzleVals[i][j];
+				if (m_puzzleVals[i][j] != 0){
+					candidates[cellValue - 1] = 0;
 				}
 			}
 		}
@@ -132,7 +126,7 @@ public class Puzzle {
 	}
 	
 	public int[] cellCandidates(int x, int y){
-		int[] candidates = new int[m_size];
+		int[] candidates = getNewCandidateList();
 		int[] rowCandidates = rowCandidates(x);
 		int[] colCandidates = columnCandidates(y);
 		int[] blockCandidates = blockCandidates(getBlockNumber(x, y));
@@ -178,7 +172,7 @@ public class Puzzle {
 		int[] candidates = new int[m_size];
 		
 		for (int i = 0; i < m_size; i++){
-			candidates[i] = i;
+			candidates[i] = i+1;
 		}
 		
 		return candidates; 
