@@ -1,7 +1,11 @@
 package patterson.travis.sudoku;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 public class Puzzle {
-	private int[][] m_puzzle = null;	
+	private int[][] m_puzzleVals = null;	
 	private int m_zeroCount = 0;	
 	private int m_blockLayout[][] = null;
 	private int m_size = 0;
@@ -9,18 +13,36 @@ public class Puzzle {
 	private int m_defaultSize = 9;
 	
 	public Puzzle(){
-		int[][] vals = new int[m_defaultSize][m_defaultSize];
-		for (int i = 0; i < m_defaultSize; i++){
-			for (int j = 0; j < m_defaultSize; j++){
-				vals[i][j] = 0;
-			}
-		}
-		
-		makePuzzle(vals, m_defaultSize);
+		makePuzzle(emptyPuzzle(), m_defaultSize);
 	}
 	
 	public Puzzle(String filePath){
-		//TODO: open a file and parse it into a puzzle
+		
+		int[][] vals;
+		int size = m_defaultSize;
+		try {
+			Scanner fin = new Scanner(new File(filePath));
+			String puzzleString = "";
+			while (fin.hasNext()){
+				puzzleString += fin.nextLine() + "\n";
+			}
+			
+			String[] lines = puzzleString.split("\n");
+			size = lines.length;
+			vals = new int[size][size];
+			
+			for (int i = 0; i < size; i++){
+				for (int j = 0; j < size; j++){
+					char val = lines[i].charAt(j);
+					vals[i][j] = Character.digit(val, 10);
+				}
+			}
+			
+		} catch (FileNotFoundException e) {
+			vals = emptyPuzzle();
+		}
+		
+		makePuzzle(vals, size);
 	}
 	
 	public Puzzle(int[][] values, int puzzleSize){
@@ -29,6 +51,14 @@ public class Puzzle {
 	
 	public int getSize(){
 		return m_size;
+	}
+	
+	public int getValue(int x, int y){
+		return m_puzzleVals[x][y];
+	}
+	
+	public void setValue(int x, int y, int value){
+		m_puzzleVals[x][y] = value;
 	}
 	
 	public int getBlockNumber(int x, int y){
@@ -40,30 +70,31 @@ public class Puzzle {
 	
 	public int[] rowCandidates(int x){
 		int[] candidates = getNewCandidateList();
-		int numZeros = 0;
+		int[] existingValues = m_puzzleVals[x];
 		
-		for (int i = 0; i < m_size; i ++){
-			int cellValue = m_puzzle[x][i];
-			if (cellValue != 0){
-				candidates[cellValue] = 0;
-				numZeros++;
+		for (int i = 0; i < existingValues.length; i++){
+			int cellValue = existingValues[i] - 1;
+			if (cellValue >= 0){
+				if (candidates[cellValue] != 0){
+					candidates[cellValue] = 0;
+				}
 			}
 		}
-		return stripZeros(candidates, numZeros);
+		return candidates;
 	}
 	
 	public int[] columnCandidates(int y){
 		int[] candidates = getNewCandidateList();
-		int numZeros = 0;
 		
 		for (int i = 0; i < m_size; i ++){
-			int cellValue = m_puzzle[i][y];
-			if (cellValue != 0){
-				candidates[cellValue] = 0;
-				numZeros++;
+			int cellValue = m_puzzleVals[i][y] - 1;
+			if (cellValue >= 0){
+				if (cellValue != 0){
+					candidates[cellValue] = 0;
+				}
 			}
 		}
-		return stripZeros(candidates, numZeros);
+		return candidates;
 	}
 	
 	public int[] blockCandidates(int block){
@@ -85,19 +116,19 @@ public class Puzzle {
 		//Convert the block indices to puzzle indices
 		blockX = blockX * m_numBlocks;
 		blockY = blockY * m_numBlocks;
-		int numZeros = 0;
 		
 		for (int i = blockX; i < blockX + m_numBlocks; i++){
 			for (int j = blockX; j < blockX + m_numBlocks; j++){
-				int cellValue = m_puzzle[i][j];
-				if (cellValue != 0){
-					candidates[cellValue] = 0;
-					numZeros++;
+				int cellValue = m_puzzleVals[i][j] - 1;
+				if (cellValue >= 0){
+					if (cellValue != 0){
+						candidates[cellValue] = 0;
+					}
 				}
 			}
 		}
 		
-		return stripZeros(candidates, numZeros);
+		return candidates;
 	}
 	
 	public int[] cellCandidates(int x, int y){
@@ -105,39 +136,28 @@ public class Puzzle {
 		int[] rowCandidates = rowCandidates(x);
 		int[] colCandidates = columnCandidates(y);
 		int[] blockCandidates = blockCandidates(getBlockNumber(x, y));
-		int numZeros = 0;
 		
-		for (int i = 0; i < rowCandidates.length; i++){
-			int cellValue = rowCandidates[i];
-			candidates[cellValue] = 0;
-			numZeros++;
-		}
-		
-		for (int i = 0; i < colCandidates.length; i++){
-			int cellValue = colCandidates[i];
-			if (candidates[cellValue] != 0){
-				candidates[cellValue] = 0;
-				numZeros++;
+		for (int i = 0; i < candidates.length; i++){
+			if (rowCandidates[i] == 0){
+				candidates[i] = 0;
 			}
-		}
-		
-		for (int i = 0; i < blockCandidates.length; i++){
-			int cellValue = blockCandidates[i];
-			if (candidates[cellValue] != 0){
-				candidates[cellValue] = 0;
-				numZeros++;
+			if (colCandidates[i] == 0){
+				candidates[i] = 0;
+			}
+			if (blockCandidates[i] == 0){
+				candidates[i] = 0;
 			}
 		}
 				
-		return stripZeros(candidates, numZeros);
+		return candidates;
 	}
-		
+			
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
 		
 		for (int i = 0; i < m_size; i ++){
 			for (int j = 0; j < m_size; j++){
-				sb.append(m_puzzle[i][j]);
+				sb.append(m_puzzleVals[i][j]);
 				sb.append(" ");
 			}
 			sb.append("\n");
@@ -147,10 +167,10 @@ public class Puzzle {
 	
 	private void makePuzzle(int[][] values, int size){
 		m_size = size;
-		m_puzzle = new int[m_size][m_size];
+		m_puzzleVals = new int[m_size][m_size];
 		for(int i=0; i<m_size; i++){
 			for(int j=0; j<m_size; j++){
-				m_puzzle[i][j] = values[i][j];
+				m_puzzleVals[i][j] = values[i][j];
 
 				if(values[i][j] == 0)
 					m_zeroCount++;
@@ -169,21 +189,7 @@ public class Puzzle {
 		
 		return candidates; 
 	}
-	
-	private int[] stripZeros(int[] candidateArray, int numZeros){
-		int[] strippedCandidates = new int[candidateArray.length - numZeros];
 		
-		int strippedIndex = 0;
-		for (int i = 0; i < candidateArray.length; i++){
-			if (candidateArray[i] != 0){
-				strippedCandidates[strippedIndex] = candidateArray[i];
-				strippedIndex++;
-			}
-		}
-		
-		return strippedCandidates;
-	}
-	
 	private void setupBlockLayout() {
 		m_numBlocks = (int)Math.sqrt(m_size);
 		m_blockLayout = new int[m_numBlocks][m_numBlocks];
@@ -195,6 +201,15 @@ public class Puzzle {
 				blockNumber++;
 			}
 		}
-		
+	}
+	
+	private int[][] emptyPuzzle(){
+		int[][] vals = new int[m_defaultSize][m_defaultSize];
+		for (int i = 0; i < m_defaultSize; i++){
+			for (int j = 0; j < m_defaultSize; j++){
+				vals[i][j] = 0;
+			}
+		}
+		return vals;
 	}
 }

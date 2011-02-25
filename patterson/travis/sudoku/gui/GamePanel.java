@@ -13,9 +13,6 @@ import javax.swing.text.PlainDocument;
 import patterson.travis.sudoku.Puzzle;
 
 public class GamePanel extends JPanel {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private JTextField[][] m_guiPuzzle = null;
 	private Puzzle m_puzzle;
@@ -23,6 +20,7 @@ public class GamePanel extends JPanel {
 	public GamePanel(Puzzle puzzle){
 		m_puzzle = puzzle;
 		setupPanel();
+		update();
 	}
 	
 	private void setupPanel() {
@@ -44,12 +42,27 @@ public class GamePanel extends JPanel {
 		}				
 	}
 	
+	public void setPuzzle(Puzzle puzzle){
+		m_puzzle = puzzle;
+		update();
+	}
+	
 	private JTextField makeNewTextField(){
 		JTextField field = new JTextField(1);
 		field.setFont(new Font("SansSerif", Font.PLAIN, 36));
 		field.setDocument(new JTextFieldLimit(1));
 		field.setHorizontalAlignment(JTextField.CENTER);
 		return field;
+	}
+	
+	public void update(){
+		int size = m_puzzle.getSize();
+		for(int i = 0; i < size; i++){
+			for (int j = 0; j < size; j++){
+				String value = Integer.toString(m_puzzle.getValue(i, j));
+				m_guiPuzzle[i][j].setText(value);
+			}
+		}
 	}
 	
 	private class JTextFieldLimit extends PlainDocument {

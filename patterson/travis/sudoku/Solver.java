@@ -1,23 +1,24 @@
 package patterson.travis.sudoku;
 
-import javax.swing.JButton;
+import patterson.travis.sudoku.gui.GamePanel;
 
 
 public class Solver implements Runnable{
 	private Puzzle m_puzzle;
-	private JButton solveButton;
+	private GamePanel m_gamePanel;
+	private boolean m_solved = true;
 	
-	public Solver(Puzzle p, JButton s){
-		solveButton = s;
-		m_puzzle = p;
+	public Solver(Puzzle puzzle, GamePanel gamePanel){
+		m_puzzle = puzzle;
+		m_gamePanel = gamePanel;
 	}
 	
 	public void run() {
-		solveButton.setText("Solving");
-		solveButton.setEnabled(false);
 		solvePuzzle();
-		solveButton.setText("Solve");
-		solveButton.setEnabled(true);
+	}
+	
+	public boolean isSolved(){
+		return m_solved;
 	}
 	
 	private void solvePuzzle(){

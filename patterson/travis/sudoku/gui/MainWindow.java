@@ -1,13 +1,9 @@
 package patterson.travis.sudoku.gui;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -16,51 +12,40 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicArrowButton;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
 
 import patterson.travis.sudoku.Puzzle;
-import puzzle.Solution;
+import patterson.travis.sudoku.Solver;
 
 public class MainWindow extends JFrame{
 	private static final long serialVersionUID = 1L;
 		
-	private JButton solve = new JButton("Solve");
+	private JButton m_solveButton = new JButton("Solve");
 	private GamePanel m_gamePanel;
-	private JLabel of = new JLabel(" of 0");
-	private JTextField selectSolution = new JTextField("0");
+	private JLabel m_solutionsOutOfLabel = new JLabel(" of 0");
+	private JTextField m_solutionSelection = new JTextField("0");
 	
-	
-	private ArrayList<Solution> solutions = new ArrayList<Solution>();
-	private int viewingSolution = 0;
-	private Puzzle puzzle = new Puzzle();
+	private Puzzle m_puzzle = new Puzzle();
+	private Solver m_solver;
 			
 	public MainWindow(){
 		this.setTitle("Travis' Sudoku Solver");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setPreferredSize(new Dimension(480, 640));
 		this.setLayout(new BorderLayout());
-		this.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width/2) - (480/2), (Toolkit.getDefaultToolkit().getScreenSize().height/2) - (640/2));
 		this.setIconImage(Toolkit.getDefaultToolkit().createImage(MainWindow.class.getResource("untitled.GIF")));
 		
 		setupToolbar();
 		setupGamePanel();
 		setupSouthPanel();
 		
-		
-		
 		this.pack();
 		this.setVisible(true);
-		
-		
 	}
 	
 	private void setupGamePanel(){
-		m_gamePanel = new GamePanel(puzzle);
+		m_gamePanel = new GamePanel(m_puzzle);
 		this.add(m_gamePanel, BorderLayout.CENTER);
 	}	
 	
@@ -70,20 +55,20 @@ public class MainWindow extends JFrame{
 		BasicArrowButton next = new BasicArrowButton(JButton.EAST);
 		BasicArrowButton prev = new BasicArrowButton(JButton.WEST);
 				
-		solve.addActionListener(new PuzzleSolver());
+		m_solveButton.addActionListener(new PuzzleSolver());
 				
-		selectSolution.setPreferredSize(new Dimension(150, 20));
-		selectSolution.addActionListener(new SelectSolutionListener());
+		m_solutionSelection.setPreferredSize(new Dimension(150, 20));
+		m_solutionSelection.addActionListener(new SelectSolutionListener());
 				
 		next.setToolTipText("Click to view next solution.");
 		prev.setToolTipText("Click to view previous solution.");
 		next.addActionListener(new ChangeViewedSolutionListener());
 		prev.addActionListener(new ChangeViewedSolutionListener());
 		
-		southPanel.add(solve);
+		southPanel.add(m_solveButton);
 		southPanel.add(viewing);
-		southPanel.add(selectSolution);
-		southPanel.add(of);
+		southPanel.add(m_solutionSelection);
+		southPanel.add(m_solutionsOutOfLabel);
 		southPanel.add(prev);
 		southPanel.add(next);
 		
@@ -110,38 +95,31 @@ public class MainWindow extends JFrame{
 			diag.setDialogTitle("Open File");
 			int option = diag.showOpenDialog(null);
 	        if(option == JFileChooser.APPROVE_OPTION){
-	        	puzzle = new Puzzle(diag.getSelectedFile().getAbsolutePath());
+	        	m_puzzle = new Puzzle(diag.getSelectedFile().getAbsolutePath());
+	        	m_gamePanel.setPuzzle(m_puzzle);
 	        }
 		}
 	}
 	
 	private class PuzzleSolver implements ActionListener {
-				
 		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-			System.out.println(puzzle);
+			m_solver = new Solver(m_puzzle, m_gamePanel);
+			m_solveButton.setText("Solving");
+			m_solveButton.setEnabled(false);
+			SwingUtilities.invokeLater(m_solver);		
 		}
-		
 	}
 	
 	private class SelectSolutionListener implements ActionListener {
-
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			
 		}
-		
 	}
 	
 	private class ChangeViewedSolutionListener implements ActionListener{
-
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			
 		}
-		
 	}
 	
 	public static void main(String[] args) {
