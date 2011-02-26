@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
@@ -31,7 +32,7 @@ public class GamePanel extends JPanel {
 		
 		for (int i = 0; i < size; i ++){
 			for (int j = 0; j < size; j++){
-				JTextField field = makeNewTextField();
+				JTextField field = makeNewTextField(i,j);
 				m_guiPuzzle[i][j] = field;
 				
 				if (m_puzzle.getBlockNumber(i, j) % 2 != 0){
@@ -47,10 +48,21 @@ public class GamePanel extends JPanel {
 		update();
 	}
 	
-	private JTextField makeNewTextField(){
+	public int[][] getValues(){
+		int size = m_puzzle.getSize();
+		int[][] values = new int[size][size];
+		for (int i = 0; i < size; i ++){
+			for (int j = 0; j < size; j ++){
+				values[i][j] = Integer.parseInt(m_guiPuzzle[i][j].getText());
+			}
+		}
+		return values;
+	}
+	
+	private JTextField makeNewTextField(int xPos, int yPos){
 		JTextField field = new JTextField(1);
 		field.setFont(new Font("SansSerif", Font.PLAIN, 36));
-		field.setDocument(new JTextFieldLimit(1));
+		field.setDocument(new JTextFieldLimit(1, xPos, yPos));
 		field.setHorizontalAlignment(JTextField.CENTER);
 		return field;
 	}
@@ -68,26 +80,37 @@ public class GamePanel extends JPanel {
 	private class JTextFieldLimit extends PlainDocument {
 		private static final long serialVersionUID = 1L;
 		private int m_limit;
-
-		JTextFieldLimit(int limit) {
+		private int m_xPos;
+		private int m_yPos;
+		
+		JTextFieldLimit(int limit, int xPos, int yPos) {
 			super();
 			m_limit = limit;
+			m_xPos = xPos;
+			m_yPos = yPos;
 		}
 
-		public void insertString (int offset, String str, AttributeSet attr)
-		throws BadLocationException {
+		public void insertString (int offset, String str, AttributeSet attr) {
 			if (str != null){
 				int length = getLength() + str.length();
 				if (length <= m_limit) {
 					try{
-						if(Integer.parseInt(str) > 0){
+						int val = Integer.parseInt(str);
+						if (val > 0){
 							super.insertString(offset, str, attr);
+							m_puzzle.setValue(m_xPos, m_yPos, val);
 						}
 					}catch (NumberFormatException n){
+						return;
+					} catch (BadLocationException e) {
 						return;
 					}
 				}
 			}
+		}
+		
+		protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
+			m_puzzle.setValue(m_xPos, m_yPos, 0);
 		}
 	}
 }

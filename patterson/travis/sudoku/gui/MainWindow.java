@@ -1,6 +1,7 @@
 package patterson.travis.sudoku.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +24,7 @@ public class MainWindow extends JFrame{
 	private static final long serialVersionUID = 1L;
 		
 	private JButton m_solveButton = new JButton("Solve");
+	private JButton m_stopSolvingButton = new JButton("Stop Solving");
 	private GamePanel m_gamePanel;
 	private JLabel m_solutionsOutOfLabel = new JLabel(" of 0");
 	private JTextField m_solutionSelection = new JTextField("0");
@@ -52,13 +54,16 @@ public class MainWindow extends JFrame{
 	
 	private void setupSouthPanel() {
 		JPanel southPanel = new JPanel();
-		JLabel viewing = new JLabel("Viewing soluion ");
+		JLabel viewing = new JLabel("Soluion ");
 		BasicArrowButton next = new BasicArrowButton(JButton.EAST);
 		BasicArrowButton prev = new BasicArrowButton(JButton.WEST);
 				
-		m_solveButton.addActionListener(new PuzzleSolver());
+		m_solveButton.addActionListener(new PuzzleSolver(true));
+		m_stopSolvingButton.addActionListener(new PuzzleSolver(false));
+		m_stopSolvingButton.setEnabled(false);
 				
-		m_solutionSelection.setPreferredSize(new Dimension(150, 20));
+		m_solutionSelection.setHorizontalAlignment(JTextField.RIGHT);
+		m_solutionSelection.setPreferredSize(new Dimension(100, 20));
 		m_solutionSelection.addActionListener(new SelectSolutionListener());
 				
 		next.setToolTipText("Click to view next solution.");
@@ -67,6 +72,7 @@ public class MainWindow extends JFrame{
 		prev.addActionListener(new ChangeViewedSolutionListener());
 		
 		southPanel.add(m_solveButton);
+		southPanel.add(m_stopSolvingButton);
 		southPanel.add(viewing);
 		southPanel.add(m_solutionSelection);
 		southPanel.add(m_solutionsOutOfLabel);
@@ -79,6 +85,20 @@ public class MainWindow extends JFrame{
 	private void setupToolbar() {
 		JToolBar toolBar = new JToolBar();
 		setupOpenFileButton(toolBar);
+		JButton printPuzz = new JButton("print");
+		printPuzz.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				int size = m_puzzle.getSize();
+				for (int i = 0; i < size; i ++){
+					for (int j = 0; j < size; j++){
+						System.out.print(m_puzzle.getValue(i, j) + " ");
+					}
+					System.out.println();
+				}
+			}
+		});
+		
+		toolBar.add(printPuzz);
 		this.add(toolBar, BorderLayout.NORTH);
 	}
 	
@@ -91,24 +111,35 @@ public class MainWindow extends JFrame{
 	private class OpenFileListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			JFileChooser diag = new JFileChooser();
-							
+			
 			diag.setDialogType(JFileChooser.OPEN_DIALOG);
 			diag.setDialogTitle("Open File");
 			int option = diag.showOpenDialog(null);
 	        if(option == JFileChooser.APPROVE_OPTION){
 	        	m_puzzle = new Puzzle(diag.getSelectedFile().getAbsolutePath());
 	        	m_gamePanel.setPuzzle(m_puzzle);
-	        	System.out.println(Arrays.toString(m_puzzle.cellCandidates(0,2)));
 	        }
 		}
 	}
 	
 	private class PuzzleSolver implements ActionListener {
+		private boolean m_startSolving;
+		
+		public PuzzleSolver(boolean startSolving){
+			m_startSolving = startSolving;
+		}
+		
 		public void actionPerformed(ActionEvent e) {
-			m_solver = new Solver(m_puzzle, m_gamePanel);
-			m_solveButton.setText("Solving");
-			m_solveButton.setEnabled(false);
-			SwingUtilities.invokeLater(m_solver);		
+			if (m_startSolving){
+				m_solver = new Solver(m_puzzle, m_gamePanel);
+				m_solveButton.setEnabled(false);
+				m_stopSolvingButton.setEnabled(true);
+				SwingUtilities.invokeLater(m_solver);	
+			} else {
+				m_stopSolvingButton.setEnabled(false);
+				m_solveButton.setEnabled(true);
+				m_solver.stopSolving();
+			}
 		}
 	}
 	
