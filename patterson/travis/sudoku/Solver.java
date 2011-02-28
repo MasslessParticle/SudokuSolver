@@ -1,6 +1,9 @@
 package patterson.travis.sudoku;
 
+import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 import patterson.travis.sudoku.gui.GamePanel;
 
@@ -37,7 +40,7 @@ public class Solver implements Runnable{
 		
 		if(!m_puzzle.isSolved()){
 			m_solved = false;
-			recursiveBacktrack();
+			recursiveBacktrack(0,0, m_puzzle.getSize());
 			m_solved = true;
 		}
 	}
@@ -53,6 +56,7 @@ public class Solver implements Runnable{
 				if(strippedCandidates.length == 1){
 					int value = strippedCandidates[0];
 					m_puzzle.setValue(i, j, value);
+					System.out.println("Naked Single: " + " x: " + i + " y: " + j + " Value: " + value);
 					m_gamePanel.update();
 					foundValue = true;
 				}
@@ -63,12 +67,13 @@ public class Solver implements Runnable{
 	
 	private boolean tryHiddenSingle() {
 		int size = m_puzzle.getSize();
+		boolean foundValue = false;
 		for (int i = 0; i < size; i ++){
-			findHiddinSingleRow(size, i);
-			findHiddinSingleColumn(size, i);
-			findHiddinSingleBlock(size, i);
+			foundValue = findHiddinSingleRow(size, i);
+			foundValue = foundValue || findHiddinSingleColumn(size, i);
+			foundValue = foundValue || findHiddinSingleBlock(size, i);
 		}
-		return false;
+		return foundValue;
 	}
 	
 	private boolean findHiddinSingleColumn(int size, int y) {
@@ -81,13 +86,16 @@ public class Solver implements Runnable{
 		
 		for (int i = 0; i < size; i ++){
 			int count = 0;
+			int lastCandidateLocation = -1;
 			for (int j = 0; j < size; j++){
 				if (allCandidates.get(j)[i] > 0){
+					lastCandidateLocation = j;
 					count++;
 				}
 			}
 			if (count == 1){
-				m_puzzle.setValue(i, y, i+1);
+				m_puzzle.setValue(lastCandidateLocation, y, i+1);
+				System.out.println("hidden Single: " + " x: " + lastCandidateLocation + " y: " + y + " Value: " + i+1);
 				m_gamePanel.update();
 				valueSet = true;
 			}
@@ -95,21 +103,116 @@ public class Solver implements Runnable{
 		return valueSet;
 	}
 
-	private void findHiddinSingleRow(int size, int x) {
-		// TODO Auto-generated method stub
+	private boolean findHiddinSingleRow(int size, int x) {
+		ArrayList<int[]> allCandidates = new ArrayList<int[]>();
+		boolean valueSet = false;
 		
+		for(int i = 0; i < size; i++){
+			allCandidates.add(m_puzzle.cellCandidates(x, i));
+		}
+		
+		for (int i = 0; i < size; i ++){
+			int count = 0;
+			int lastCandidateLocation = -1;
+			for (int j = 0; j < size; j++){
+				if (allCandidates.get(j)[i] > 0){
+					lastCandidateLocation = j;
+					count++;
+				}
+			}
+			if (count == 1){
+				m_puzzle.setValue(x, lastCandidateLocation, i+1);
+				System.out.println("hidden Single: " + " x: " + x + " y: " + lastCandidateLocation + " Value: " + i+1);
+				m_gamePanel.update();
+				valueSet = true;
+			}
+		}
+		return valueSet;
 	}
 
-	private void findHiddinSingleBlock(int size, int blockNumber) {
-		// TODO Auto-generated method stub
+	private boolean findHiddinSingleBlock(int size, int blockNumber) {
+		HashMap<Point,int[]> allCandidates = new HashMap<Point,int[]>();
+		boolean valueSet = false;
+		int blockSize = (int)Math.sqrt(size);
+		Point blockIndices = m_puzzle.getBlockIndices(blockNumber);
+		int blockX = blockIndices.x;
+		int blockY = blockIndices.y;
 		
+		for(int i = blockX; i < blockX + blockSize; i++){
+			for (int j = blockY; j < blockY + blockSize; j++){
+				allCandidates.put(new Point(i,j), m_puzzle.cellCandidates(i, j));
+			}
+		}
+		
+		Point[] blockCells = allCandidates.keySet().toArray(new Point[0]);
+		for (int i = 0; i < size; i ++){
+			int count = 0;
+			int lastCandidateLocation = -1;
+			for (int j = 0; j < size; j++){
+				Point blockCell = blockCells[j];
+				if (allCandidates.get(blockCell)[i] > 0){
+					lastCandidateLocation = j;
+					count++;
+				}
+			}
+			if (count == 1){
+				Point blockCell = blockCells[lastCandidateLocation];
+				m_puzzle.setValue(blockCell.x, blockCell.y, i+1);
+				System.out.println("hidden Single: " + " x: " + blockCell.x + " y: " + blockCell.y + " Value: " + i+1);
+				m_gamePanel.update();
+				valueSet = true;
+			}
+		}
+		return valueSet;
 	}
 
-	private void recursiveBacktrack() {
-		// TODO Auto-generated method stub
+	private void recursiveBacktrack(int x, int y, int size) {
+		Integer[] candidates = stripZeros(m_puzzle.cellCandidates(x, y));
+		//System.out.println(m_puzzle);
 		
+		if(m_isSolving){
+			Point nextCell = getNextCell(x, y, size);
+			
+			if (m_puzzle.getValue(x, y) == 0){		
+				for (Integer candidate : candidates) {
+					m_puzzle.setValue(x, y, candidate);
+															
+					if(nextCell != null){
+						recursiveBacktrack(nextCell.x, nextCell.y, size);
+					}
+					
+					if(m_puzzle.isSolved()){
+						m_puzzle.saveSolution();
+						m_gamePanel.update();
+					}
+					
+					if(!m_isSolving){
+						return;
+					}
+				}
+				
+				if(m_isSolving){
+					m_puzzle.setValue(x, y, 0);
+				}
+			} else {
+				if(nextCell != null){
+					recursiveBacktrack(nextCell.x, nextCell.y, size);
+				}
+				//m_isSolving = false; //No more puzzle left
+			}
+		}
 	}
-	
+		
+	private Point getNextCell(int x, int y, int size) {
+		if (y + 1 < size){
+			return new Point(x, y + 1);
+		} else if (x + 1 < size){
+			return new Point(x + 1, 0);
+		} else {
+			return null;
+		}		
+	}
+
 	private Integer[] stripZeros(int[] values){
 		ArrayList<Integer> strippedValueList = new ArrayList<Integer>();
 				

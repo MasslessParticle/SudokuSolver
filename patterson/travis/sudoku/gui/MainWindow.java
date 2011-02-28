@@ -85,16 +85,11 @@ public class MainWindow extends JFrame{
 	private void setupToolbar() {
 		JToolBar toolBar = new JToolBar();
 		setupOpenFileButton(toolBar);
-		JButton printPuzz = new JButton("print");
+		JButton printPuzz = new JButton("is Solved");
 		printPuzz.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
-				int size = m_puzzle.getSize();
-				for (int i = 0; i < size; i ++){
-					for (int j = 0; j < size; j++){
-						System.out.print(m_puzzle.getValue(i, j) + " ");
-					}
-					System.out.println();
-				}
+				System.out.println(m_puzzle);
+				System.out.println(m_puzzle.isSolved());
 			}
 		});
 		
@@ -134,7 +129,8 @@ public class MainWindow extends JFrame{
 				m_solver = new Solver(m_puzzle, m_gamePanel);
 				m_solveButton.setEnabled(false);
 				m_stopSolvingButton.setEnabled(true);
-				SwingUtilities.invokeLater(m_solver);	
+				new Thread(m_solver).start();
+				//SwingUtilities.invokeLater(m_solver);
 			} else {
 				m_stopSolvingButton.setEnabled(false);
 				m_solveButton.setEnabled(true);

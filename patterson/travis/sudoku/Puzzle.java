@@ -106,11 +106,9 @@ public class Puzzle {
 		Point blockIndices = getBlockIndices(block);
 		int blockX = blockIndices.x;
 		int blockY = blockIndices.y;
-		int puzzleX = blockX * m_numBlocks;
-		int puzzleY = blockY * m_numBlocks;
-				
-		for (int i = puzzleX; i < puzzleX + m_numBlocks; i++){
-			for (int j = puzzleY; j < puzzleY + m_numBlocks; j++){
+						
+		for (int i = blockX; i < blockX + m_numBlocks; i++){
+			for (int j = blockY; j < blockY + m_numBlocks; j++){
 				int cellValue = m_puzzleVals[i][j];
 				if (m_puzzleVals[i][j] != 0){
 					candidates[cellValue - 1] = 0;
@@ -143,12 +141,9 @@ public class Puzzle {
 	public boolean isSolved(){
 		boolean valid = false;
 		for (int i = 0; i < m_size; i++){
-			int[] rowVals = getRowValues(i);
-			int[] colVals = getColumnValues(i);
-			int[] blockVals = getBlockValues(i);
-			valid = validRowColumnOrBlock(rowVals);
-			valid = valid && validRowColumnOrBlock(colVals);
-			valid = valid && validRowColumnOrBlock(blockVals);
+			valid = validRow(i);
+			valid = valid && validColumn(i);
+			valid = valid && validBlock(i);
 			if (!valid){
 				return false;
 			}
@@ -162,6 +157,21 @@ public class Puzzle {
 		}
 	}
 	
+	public boolean validRow(int y){
+		int[] rowVals = getRowValues(y);
+		return validRowColumnOrBlock(rowVals);
+	}
+	
+	public boolean validColumn(int x){
+		int[] colVals = getColumnValues(x);
+		return validRowColumnOrBlock(colVals);
+	}
+	
+	public boolean validBlock(int blockNum){
+		int[] blockVals = getBlockValues(blockNum);
+		return validRowColumnOrBlock(blockVals);
+	}
+	
 	public Point getBlockIndices(int blockNumber){
 		int blockX = 0;
 		int blockY = 0;
@@ -172,7 +182,7 @@ public class Puzzle {
 				if(blockNumber == m_blockLayout[i][j]){
 					blockX = i;
 					blockY = j;
-					return new Point(blockX, blockY);
+					return new Point(blockX * m_numBlocks, blockY * m_numBlocks);
 				}
 			}
 		}
@@ -232,13 +242,11 @@ public class Puzzle {
 		Point blockIndices = getBlockIndices(blockNumber);
 		int blockX = blockIndices.x;
 		int blockY = blockIndices.y;
-		int puzzleX = blockX * m_numBlocks;
-		int puzzleY = blockY * m_numBlocks;
 		int valsIndex = 0;
 		
-		while (valsIndex < 9){
-			for (int i = puzzleX; i < puzzleX + m_numBlocks; i++){
-				for (int j = puzzleY; j < puzzleY + m_numBlocks; j++){
+		while (valsIndex < m_size){
+			for (int i = blockX; i < blockX + m_numBlocks; i++){
+				for (int j = blockY; j < blockY + m_numBlocks; j++){
 					vals[valsIndex] = m_puzzleVals[i][j];
 					valsIndex++;
 				}
