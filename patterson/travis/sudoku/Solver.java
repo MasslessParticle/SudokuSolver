@@ -3,7 +3,6 @@ package patterson.travis.sudoku;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 import patterson.travis.sudoku.gui.GamePanel;
 
@@ -17,8 +16,20 @@ public class Solver implements Runnable{
 	public Solver(Puzzle puzzle, GamePanel gamePanel){
 		m_puzzle = puzzle;
 		m_gamePanel = gamePanel;
+		initializePuzzle();
 	}
 	
+	private void initializePuzzle() {
+		int size = m_puzzle.getSize();
+		int[][] values = m_gamePanel.getValues();
+		
+		for (int i = 0; i < size; i++){
+			for (int j = 0; j < size; j++){
+				m_puzzle.setValue(i, j, values[i][j]);
+			}
+		}
+	}
+
 	public void run() {
 		solvePuzzle();
 	}
@@ -38,11 +49,16 @@ public class Solver implements Runnable{
 			m_solved = m_solved && !tryHiddenSingle();			
 		}
 		
-		if(!m_puzzle.isSolved()){
-			m_solved = false;
+		if(m_isSolving){
 			recursiveBacktrack(0,0, m_puzzle.getSize());
-			m_solved = true;
 		}
+		
+		if(m_puzzle.isSolved()){
+			m_gamePanel.update();
+		}
+		
+		m_gamePanel.startSolvingButton().setEnabled(true);
+		m_gamePanel.stopSolvingButton().setEnabled(false);
 	}
 	
 	private boolean tryNakedSingle() {
@@ -56,7 +72,6 @@ public class Solver implements Runnable{
 				if(strippedCandidates.length == 1){
 					int value = strippedCandidates[0];
 					m_puzzle.setValue(i, j, value);
-					System.out.println("Naked Single: " + " x: " + i + " y: " + j + " Value: " + value);
 					m_gamePanel.update();
 					foundValue = true;
 				}
@@ -95,7 +110,6 @@ public class Solver implements Runnable{
 			}
 			if (count == 1){
 				m_puzzle.setValue(lastCandidateLocation, y, i+1);
-				System.out.println("hidden Single: " + " x: " + lastCandidateLocation + " y: " + y + " Value: " + i+1);
 				m_gamePanel.update();
 				valueSet = true;
 			}
@@ -122,7 +136,6 @@ public class Solver implements Runnable{
 			}
 			if (count == 1){
 				m_puzzle.setValue(x, lastCandidateLocation, i+1);
-				System.out.println("hidden Single: " + " x: " + x + " y: " + lastCandidateLocation + " Value: " + i+1);
 				m_gamePanel.update();
 				valueSet = true;
 			}
@@ -158,7 +171,6 @@ public class Solver implements Runnable{
 			if (count == 1){
 				Point blockCell = blockCells[lastCandidateLocation];
 				m_puzzle.setValue(blockCell.x, blockCell.y, i+1);
-				System.out.println("hidden Single: " + " x: " + blockCell.x + " y: " + blockCell.y + " Value: " + i+1);
 				m_gamePanel.update();
 				valueSet = true;
 			}
@@ -168,8 +180,7 @@ public class Solver implements Runnable{
 
 	private void recursiveBacktrack(int x, int y, int size) {
 		Integer[] candidates = stripZeros(m_puzzle.cellCandidates(x, y));
-		//System.out.println(m_puzzle);
-		
+				
 		if(m_isSolving){
 			Point nextCell = getNextCell(x, y, size);
 			
@@ -181,13 +192,13 @@ public class Solver implements Runnable{
 						recursiveBacktrack(nextCell.x, nextCell.y, size);
 					}
 					
+					if(!m_isSolving){
+						return;
+					}
+					
 					if(m_puzzle.isSolved()){
 						m_puzzle.saveSolution();
 						m_gamePanel.update();
-					}
-					
-					if(!m_isSolving){
-						return;
 					}
 				}
 				
@@ -198,7 +209,6 @@ public class Solver implements Runnable{
 				if(nextCell != null){
 					recursiveBacktrack(nextCell.x, nextCell.y, size);
 				}
-				//m_isSolving = false; //No more puzzle left
 			}
 		}
 	}

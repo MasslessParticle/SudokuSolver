@@ -1,20 +1,16 @@
 package patterson.travis.sudoku.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import patterson.travis.sudoku.Puzzle;
@@ -25,10 +21,9 @@ public class MainWindow extends JFrame{
 		
 	private JButton m_solveButton = new JButton("Solve");
 	private JButton m_stopSolvingButton = new JButton("Stop Solving");
+	private JLabel m_numberSolutions = new JLabel("0");
+	private JLabel m_solutionSelection = new JLabel("0");
 	private GamePanel m_gamePanel;
-	private JLabel m_solutionsOutOfLabel = new JLabel(" of 0");
-	private JTextField m_solutionSelection = new JTextField("0");
-	
 	private Puzzle m_puzzle = new Puzzle();
 	private Solver m_solver;
 			
@@ -40,15 +35,15 @@ public class MainWindow extends JFrame{
 		this.setIconImage(Toolkit.getDefaultToolkit().createImage(MainWindow.class.getResource("untitled.GIF")));
 		
 		setupToolbar();
-		setupGamePanel();
 		setupSouthPanel();
-		
+		setupGamePanel();
+				
 		this.pack();
 		this.setVisible(true);
 	}
 	
 	private void setupGamePanel(){
-		m_gamePanel = new GamePanel(m_puzzle);
+		m_gamePanel = new GamePanel(m_puzzle, m_numberSolutions, m_solutionSelection, m_solveButton, m_stopSolvingButton);
 		this.add(m_gamePanel, BorderLayout.CENTER);
 	}	
 	
@@ -61,21 +56,18 @@ public class MainWindow extends JFrame{
 		m_solveButton.addActionListener(new PuzzleSolver(true));
 		m_stopSolvingButton.addActionListener(new PuzzleSolver(false));
 		m_stopSolvingButton.setEnabled(false);
-				
-		m_solutionSelection.setHorizontalAlignment(JTextField.RIGHT);
-		m_solutionSelection.setPreferredSize(new Dimension(100, 20));
-		m_solutionSelection.addActionListener(new SelectSolutionListener());
-				
+						
 		next.setToolTipText("Click to view next solution.");
 		prev.setToolTipText("Click to view previous solution.");
-		next.addActionListener(new ChangeViewedSolutionListener());
-		prev.addActionListener(new ChangeViewedSolutionListener());
+		next.addActionListener(new ChangeViewedSolutionListener(true));
+		prev.addActionListener(new ChangeViewedSolutionListener(false));
 		
 		southPanel.add(m_solveButton);
 		southPanel.add(m_stopSolvingButton);
 		southPanel.add(viewing);
 		southPanel.add(m_solutionSelection);
-		southPanel.add(m_solutionsOutOfLabel);
+		southPanel.add(new JLabel(" of "));
+		southPanel.add(m_numberSolutions);
 		southPanel.add(prev);
 		southPanel.add(next);
 		
@@ -85,15 +77,6 @@ public class MainWindow extends JFrame{
 	private void setupToolbar() {
 		JToolBar toolBar = new JToolBar();
 		setupOpenFileButton(toolBar);
-		JButton printPuzz = new JButton("is Solved");
-		printPuzz.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println(m_puzzle);
-				System.out.println(m_puzzle.isSolved());
-			}
-		});
-		
-		toolBar.add(printPuzz);
 		this.add(toolBar, BorderLayout.NORTH);
 	}
 	
@@ -113,6 +96,8 @@ public class MainWindow extends JFrame{
 	        if(option == JFileChooser.APPROVE_OPTION){
 	        	m_puzzle = new Puzzle(diag.getSelectedFile().getAbsolutePath());
 	        	m_gamePanel.setPuzzle(m_puzzle);
+	        	m_numberSolutions.setText("0");
+	        	m_solutionSelection.setText("0");
 	        }
 		}
 	}
@@ -126,11 +111,16 @@ public class MainWindow extends JFrame{
 		
 		public void actionPerformed(ActionEvent e) {
 			if (m_startSolving){
+				int[][] values = m_gamePanel.getValues();
+				int size = m_puzzle.getSize();
+				m_puzzle = new Puzzle(values, size);
+				m_gamePanel.setPuzzle(m_puzzle);
 				m_solver = new Solver(m_puzzle, m_gamePanel);
+				m_numberSolutions.setText("0");
+				m_solutionSelection.setText("0");
 				m_solveButton.setEnabled(false);
 				m_stopSolvingButton.setEnabled(true);
 				new Thread(m_solver).start();
-				//SwingUtilities.invokeLater(m_solver);
 			} else {
 				m_stopSolvingButton.setEnabled(false);
 				m_solveButton.setEnabled(true);
@@ -138,16 +128,27 @@ public class MainWindow extends JFrame{
 			}
 		}
 	}
-	
-	private class SelectSolutionListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
-		}
-	}
-	
+			
 	private class ChangeViewedSolutionListener implements ActionListener{
+		boolean m_next = false;
+		
+		public ChangeViewedSolutionListener(boolean next){
+			m_next = next;
+		}
+		
 		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub
+			int solutionNumber = Integer.parseInt(m_solutionSelection.getText());
+			int maxSolutions = Integer.parseInt(m_numberSolutions.getText());
+			
+			if(m_next){
+				solutionNumber = Math.min(solutionNumber + 1, maxSolutions);
+			} else {
+				solutionNumber = Math.max(solutionNumber - 1, 0);
+			}
+			
+			String newSolutionNumber = Integer.toString(solutionNumber);
+			m_solutionSelection.setText(newSolutionNumber);
+			m_gamePanel.update();
 		}
 	}
 	

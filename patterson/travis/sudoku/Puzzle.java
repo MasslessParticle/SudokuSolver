@@ -61,6 +61,18 @@ public class Puzzle {
 		return m_puzzleVals[x][y];
 	}
 	
+	public int[][] getValues(){
+		int[][] puzzleVals = new int[m_size][m_size];
+		
+		for (int i = 0; i < m_size; i++){
+			for (int j = 0; j < m_size; j++){
+				puzzleVals[i][j] = m_puzzleVals[i][j];
+			}
+		}
+		
+		return puzzleVals;
+	}
+	
 	public ArrayList<int[][]> getSolutions(){
 		return m_solutions;
 	}
