@@ -106,7 +106,7 @@ public class Solver implements Runnable{
 			recursiveBacktrack(0,0, m_puzzle.getSize());
 		}
 		
-		if(m_solved){
+		if(m_solved || m_puzzle.isSolved()){
 			m_gamePanel.update();
 		} else {
 			JOptionPane.showMessageDialog(m_gamePanel,
