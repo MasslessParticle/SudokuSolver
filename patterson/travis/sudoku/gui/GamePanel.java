@@ -17,12 +17,12 @@ import patterson.travis.sudoku.Puzzle;
 
 public class GamePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private JTextField[][] m_guiPuzzle = null;
+	private JTextField[][] m_guiPuzzle;
 	private Puzzle m_puzzle;
-	private JLabel m_numSolutions = null;
-	private JLabel m_solutionSelection = null;
-	private JButton m_startSolving = null;
-	private JButton m_stopSolving = null;
+	private JLabel m_numSolutions;
+	private JLabel m_solutionSelection;
+	private JButton m_startSolving;
+	private JButton m_stopSolving;
 	
 	public GamePanel(Puzzle puzzle, JLabel numSolutions, JLabel solSelevtion, JButton startSolving, JButton stopSolving){
 		m_puzzle = puzzle;
@@ -118,8 +118,7 @@ public class GamePanel extends JPanel {
 			}
 		}				
 	}
-	
-	
+		
 	private JTextField makeNewTextField(int xPos, int yPos){
 		JTextField field = new JTextField(1);
 		field.setFont(new Font("SansSerif", Font.PLAIN, 36));
@@ -127,8 +126,7 @@ public class GamePanel extends JPanel {
 		field.setHorizontalAlignment(JTextField.CENTER);
 		return field;
 	}
-	
-	
+		
 	private class JTextFieldLimit extends PlainDocument {
 		private static final long serialVersionUID = 1L;
 		private int m_limit;

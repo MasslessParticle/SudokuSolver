@@ -82,17 +82,23 @@ public class MainWindow extends JFrame{
 	
 	private void setupOpenFileButton(JToolBar toolbar){
 		JButton openFile = new JButton("Open File");
-		openFile.addActionListener(new OpenFileListener());
+		openFile.addActionListener(new OpenFileListener(this));
 		toolbar.add(openFile);
 	}
 
 	private class OpenFileListener implements ActionListener {
+		private JFrame m_container;
+		
+		public OpenFileListener(JFrame container){
+			m_container = container;
+		}
+		
 		public void actionPerformed(ActionEvent e) {
 			JFileChooser diag = new JFileChooser();
 			
 			diag.setDialogType(JFileChooser.OPEN_DIALOG);
 			diag.setDialogTitle("Open File");
-			int option = diag.showOpenDialog(null);
+			int option = diag.showOpenDialog(m_container);
 	        if(option == JFileChooser.APPROVE_OPTION){
 	        	m_puzzle = new Puzzle(diag.getSelectedFile().getAbsolutePath());
 	        	m_gamePanel.setPuzzle(m_puzzle);

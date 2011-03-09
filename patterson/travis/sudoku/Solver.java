@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.JOptionPane;
+
 import patterson.travis.sudoku.gui.GamePanel;
 
 
@@ -11,12 +13,26 @@ public class Solver implements Runnable{
 	private Puzzle m_puzzle;
 	private GamePanel m_gamePanel;
 	private boolean m_solved = false;
-	private volatile boolean m_isSolving = false;
+	private boolean m_isSolving = false;
 	
 	public Solver(Puzzle puzzle, GamePanel gamePanel){
 		m_puzzle = puzzle;
 		m_gamePanel = gamePanel;
 		initializePuzzle();
+	}
+	
+	public void run() {
+		m_solved = false;
+		m_isSolving = true;
+		solvePuzzle();
+	}
+	
+	public boolean isSolved(){
+		return m_solved;
+	}
+	
+	public void stopSolving(){
+		m_isSolving = false;
 	}
 	
 	private void initializePuzzle() {
@@ -29,32 +45,27 @@ public class Solver implements Runnable{
 			}
 		}
 	}
-
-	public void run() {
-		solvePuzzle();
-	}
-	
-	public boolean isSolved(){
-		return m_solved;
-	}
-	
-	public void stopSolving(){
-		m_isSolving = false;
-	}
 	
 	private void solvePuzzle(){
 		m_isSolving = true;
+		
 		while (m_isSolving && !m_solved){
 			m_solved = !tryNakedSingle();
 			m_solved = m_solved && !tryHiddenSingle();			
 		}
 		
 		if(m_isSolving){
+			m_solved = false;
 			recursiveBacktrack(0,0, m_puzzle.getSize());
 		}
 		
-		if(m_puzzle.isSolved()){
+		if(m_solved){
 			m_gamePanel.update();
+		} else {
+			JOptionPane.showMessageDialog(m_gamePanel,
+			    "No Solutions for this puzzle",
+			    "InvalidPuzzle",
+			    JOptionPane.ERROR_MESSAGE);
 		}
 		
 		m_gamePanel.startSolvingButton().setEnabled(true);
@@ -197,6 +208,7 @@ public class Solver implements Runnable{
 					}
 					
 					if(m_puzzle.isSolved()){
+						m_solved = true;
 						m_puzzle.saveSolution();
 						m_gamePanel.update();
 					}
