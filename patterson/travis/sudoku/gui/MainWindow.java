@@ -16,6 +16,10 @@ import javax.swing.plaf.basic.BasicArrowButton;
 import patterson.travis.sudoku.Puzzle;
 import patterson.travis.sudoku.Solver;
 
+/**
+ * @author Travis Patterson
+ * Entry class for the sudoku solver.
+ */
 public class MainWindow extends JFrame{
 	private static final long serialVersionUID = 1L;
 		
@@ -27,6 +31,9 @@ public class MainWindow extends JFrame{
 	private Puzzle m_puzzle = new Puzzle();
 	private Solver m_solver;
 			
+	/**
+	 * Kicks off the main window of the solver application
+	 */
 	public MainWindow(){
 		this.setTitle("Travis' Sudoku Solver");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -42,11 +49,18 @@ public class MainWindow extends JFrame{
 		this.setVisible(true);
 	}
 	
+	/**
+	 * Initializes the game panel
+	 */
 	private void setupGamePanel(){
 		m_gamePanel = new GamePanel(m_puzzle, m_numberSolutions, m_solutionSelection, m_solveButton, m_stopSolvingButton);
 		this.add(m_gamePanel, BorderLayout.CENTER);
 	}	
 	
+	/**
+	 * Initializes the panel containing the solution labels, solve buttons,
+	 * and solution navigation buttons
+	 */
 	private void setupSouthPanel() {
 		JPanel southPanel = new JPanel();
 		JLabel viewing = new JLabel("Soluion ");
@@ -74,25 +88,42 @@ public class MainWindow extends JFrame{
 		this.add(southPanel, BorderLayout.SOUTH);
 	}
 
+	/**
+	 * Initializes the toolbar
+	 */
 	private void setupToolbar() {
 		JToolBar toolBar = new JToolBar();
 		setupOpenFileButton(toolBar);
 		this.add(toolBar, BorderLayout.NORTH);
 	}
 	
+	/**
+	 * Initializes the open file button
+	 * @param toolbar Toolbar that the open file button belongs to
+	 */
 	private void setupOpenFileButton(JToolBar toolbar){
 		JButton openFile = new JButton("Open File");
 		openFile.addActionListener(new OpenFileListener(this));
 		toolbar.add(openFile);
 	}
 
+	/**
+	 * Listener opens the open file dialog and creates a new puzzle
+	 * if a file is successfully chosen
+	 */
 	private class OpenFileListener implements ActionListener {
 		private JFrame m_container;
 		
+		/**
+		 * @param container The JFrame that the open file dialog belongs to
+		 */
 		public OpenFileListener(JFrame container){
 			m_container = container;
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
 		public void actionPerformed(ActionEvent e) {
 			JFileChooser diag = new JFileChooser();
 			
@@ -108,13 +139,22 @@ public class MainWindow extends JFrame{
 		}
 	}
 	
+	/**
+	 * Listener to kick off or stop the Solve object
+	 */
 	private class PuzzleSolver implements ActionListener {
 		private boolean m_startSolving;
 		
+		/**
+		 * @param startSolving True if beginning solving, else false
+		 */
 		public PuzzleSolver(boolean startSolving){
 			m_startSolving = startSolving;
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
 		public void actionPerformed(ActionEvent e) {
 			if (m_startSolving){
 				int[][] values = m_gamePanel.getValues();
@@ -135,13 +175,22 @@ public class MainWindow extends JFrame{
 		}
 	}
 			
+	/**
+	 * Listener to control the solution navigation buttons.
+	 */
 	private class ChangeViewedSolutionListener implements ActionListener{
 		boolean m_next = false;
 		
+		/**
+		 * @param next True if button displays next solution else false
+		 */
 		public ChangeViewedSolutionListener(boolean next){
 			m_next = next;
 		}
 		
+		/* (non-Javadoc)
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
 		public void actionPerformed(ActionEvent e) {
 			int solutionNumber = Integer.parseInt(m_solutionSelection.getText());
 			int maxSolutions = Integer.parseInt(m_numberSolutions.getText());

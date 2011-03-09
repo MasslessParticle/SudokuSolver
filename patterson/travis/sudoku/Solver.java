@@ -9,32 +9,54 @@ import javax.swing.JOptionPane;
 import patterson.travis.sudoku.gui.GamePanel;
 
 
+/**
+ * @author Travis Patterson
+ * @copyright 2011
+ * Class that solves a Puzzle object
+ */
 public class Solver implements Runnable{
 	private Puzzle m_puzzle;
 	private GamePanel m_gamePanel;
 	private boolean m_solved = false;
 	private boolean m_isSolving = false;
 	
+	/**
+	 * @param puzzle The puzzle to solve
+	 * @param gamePanel The visual representation of the puzzle
+	 */
 	public Solver(Puzzle puzzle, GamePanel gamePanel){
 		m_puzzle = puzzle;
 		m_gamePanel = gamePanel;
 		initializePuzzle();
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
 		m_solved = false;
 		m_isSolving = true;
 		solvePuzzle();
 	}
 	
+	/**
+	 * @return True if the puzzle has been solved.
+	 */
 	public boolean isSolved(){
 		return m_solved;
 	}
 	
+	/**
+	 * Stops the solver
+	 */
 	public void stopSolving(){
 		m_isSolving = false;
 	}
 	
+	/**
+	 * Initialized the puzzle object to agree with the visual
+	 * representation in the game panel
+	 */
 	private void initializePuzzle() {
 		int size = m_puzzle.getSize();
 		int[][] values = m_gamePanel.getValues();
@@ -46,6 +68,12 @@ public class Solver implements Runnable{
 		}
 	}
 	
+	/**
+	 * Solves the puzzle using three techniques:
+	 * naked single
+	 * hidden single
+	 * brute force via recursive backtracking.
+	 */
 	private void solvePuzzle(){
 		m_isSolving = true;
 		
@@ -72,6 +100,9 @@ public class Solver implements Runnable{
 		m_gamePanel.stopSolvingButton().setEnabled(false);
 	}
 	
+	/**
+	 * @return True if a naked single was found
+	 */
 	private boolean tryNakedSingle() {
 		int puzzleSize = m_puzzle.getSize();
 		boolean foundValue = false;
@@ -91,6 +122,9 @@ public class Solver implements Runnable{
 		return foundValue;
 	}
 	
+	/**
+	 * @return True if a hidden single is found
+	 */
 	private boolean tryHiddenSingle() {
 		int size = m_puzzle.getSize();
 		boolean foundValue = false;
@@ -102,6 +136,9 @@ public class Solver implements Runnable{
 		return foundValue;
 	}
 	
+	/**
+	 * @return True if there is a hidden single in the given column of size "size"
+	 */
 	private boolean findHiddinSingleColumn(int size, int y) {
 		ArrayList<int[]> allCandidates = new ArrayList<int[]>();
 		boolean valueSet = false;
@@ -128,6 +165,9 @@ public class Solver implements Runnable{
 		return valueSet;
 	}
 
+	/**
+	 * @return True if there is a hidden single in the given row of size "size"
+	 */
 	private boolean findHiddinSingleRow(int size, int x) {
 		ArrayList<int[]> allCandidates = new ArrayList<int[]>();
 		boolean valueSet = false;
@@ -154,6 +194,9 @@ public class Solver implements Runnable{
 		return valueSet;
 	}
 
+	/**
+	 * @return True if there is a hidden single in the given block of size "size"
+	 */
 	private boolean findHiddinSingleBlock(int size, int blockNumber) {
 		HashMap<Point,int[]> allCandidates = new HashMap<Point,int[]>();
 		boolean valueSet = false;
@@ -189,6 +232,9 @@ public class Solver implements Runnable{
 		return valueSet;
 	}
 
+	/**
+	 * Performs a recursive backtrack traversal of the puzzle solving as much as it can
+	 */
 	private void recursiveBacktrack(int x, int y, int size) {
 		Integer[] candidates = stripZeros(m_puzzle.cellCandidates(x, y));
 				
@@ -225,6 +271,10 @@ public class Solver implements Runnable{
 		}
 	}
 		
+	/**
+	 * @return The next cell for the recursive traveral given the 
+	 * current cell.
+	 */
 	private Point getNextCell(int x, int y, int size) {
 		if (y + 1 < size){
 			return new Point(x, y + 1);
@@ -235,6 +285,9 @@ public class Solver implements Runnable{
 		}		
 	}
 
+	/**
+	 * @return The given array without zeros
+	 */
 	private Integer[] stripZeros(int[] values){
 		ArrayList<Integer> strippedValueList = new ArrayList<Integer>();
 				

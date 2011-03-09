@@ -15,6 +15,11 @@ import javax.swing.text.PlainDocument;
 
 import patterson.travis.sudoku.Puzzle;
 
+/**
+ * @author Travis Patterson
+ * @copyright 2011
+ * Visual Representation of a puzzle.
+ */
 public class GamePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private JTextField[][] m_guiPuzzle;
@@ -24,10 +29,17 @@ public class GamePanel extends JPanel {
 	private JButton m_startSolving;
 	private JButton m_stopSolving;
 	
-	public GamePanel(Puzzle puzzle, JLabel numSolutions, JLabel solSelevtion, JButton startSolving, JButton stopSolving){
+	/**
+	 * @param puzzle The puzzle to represent
+	 * @param numSolutions The label containing the number of solutions
+	 * @param solSelection The label containing the current solution number
+	 * @param startSolving The button to start the solver
+	 * @param stopSolving The button to stop the solver.
+	 */
+	public GamePanel(Puzzle puzzle, JLabel numSolutions, JLabel solSelection, JButton startSolving, JButton stopSolving){
 		m_puzzle = puzzle;
 		m_numSolutions = numSolutions;
-		m_solutionSelection = solSelevtion;
+		m_solutionSelection = solSelection;
 		m_startSolving = startSolving;
 		m_stopSolving = stopSolving;
 
@@ -35,10 +47,16 @@ public class GamePanel extends JPanel {
 		update();
 	}
 	
+	/**
+	 * @return The button to start the solver
+	 */ 
 	public JButton startSolvingButton(){
 		return m_startSolving;
 	}
 	
+	/**
+	 * @return The button to stop the solver
+	 */ 
 	public JButton stopSolvingButton(){
 		return m_stopSolving;
 	}
@@ -48,6 +66,9 @@ public class GamePanel extends JPanel {
 		update();
 	}
 	
+	/**
+	 * @return The numeric values of the visual representation
+	 */
 	public int[][] getValues(){
 		int size = m_puzzle.getSize();
 		int[][] values = new int[size][size];
@@ -63,6 +84,9 @@ public class GamePanel extends JPanel {
 		return values;
 	}
 	
+	/**
+	 *  Refresh the visual representation with the current solution
+	 */
 	public void update(){
 		int size = m_puzzle.getSize();
 		int[][] displaySolution = null;
@@ -99,6 +123,9 @@ public class GamePanel extends JPanel {
 		}
 	}
 	
+	/**
+	 * initializes the representation with n x n text fields
+	 */
 	private void setupPanel() {
 		int size = m_puzzle.getSize();
 		Color gray = new Color(220, 220, 220);
@@ -108,7 +135,7 @@ public class GamePanel extends JPanel {
 		
 		for (int i = 0; i < size; i ++){
 			for (int j = 0; j < size; j++){
-				JTextField field = makeNewTextField(i,j);
+				JTextField field = makeNewTextField();
 				m_guiPuzzle[i][j] = field;
 				
 				if (m_puzzle.getBlockNumber(i, j) % 2 != 0){
@@ -118,8 +145,11 @@ public class GamePanel extends JPanel {
 			}
 		}				
 	}
-		
-	private JTextField makeNewTextField(int xPos, int yPos){
+	
+	/**
+	 * @return An initialized text field
+	 */
+	private JTextField makeNewTextField(){
 		JTextField field = new JTextField(1);
 		field.setFont(new Font("SansSerif", Font.PLAIN, 36));
 		field.setDocument(new JTextFieldLimit(1));
@@ -127,15 +157,24 @@ public class GamePanel extends JPanel {
 		return field;
 	}
 		
+	/**
+	 * Class to handle TextArea input
+	 */
 	private class JTextFieldLimit extends PlainDocument {
 		private static final long serialVersionUID = 1L;
 		private int m_limit;
 		
+		/**
+		 * @param limit The max size of a TextArea in the game representation
+		 */
 		JTextFieldLimit(int limit) {
 			super();
 			m_limit = limit;
 		}
 
+		/* (non-Javadoc)
+		 * @see javax.swing.text.PlainDocument#insertString(int, java.lang.String, javax.swing.text.AttributeSet)
+		 */
 		public void insertString (int offset, String str, AttributeSet attr) {
 			if (str != null){
 				int length = getLength() + str.length();
