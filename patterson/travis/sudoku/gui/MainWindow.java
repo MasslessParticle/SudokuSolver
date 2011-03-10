@@ -179,10 +179,10 @@ public class MainWindow extends JFrame{
 				int[][] values = m_gamePanel.getValues();
 				int size = m_puzzle.getSize();
 				m_puzzle = new Puzzle(values, size);
-				m_gamePanel.setPuzzle(m_puzzle);
-				m_solver = new Solver(m_puzzle, m_gamePanel);
 				m_numberSolutions.setText("0");
 				m_solutionSelection.setText("0");
+				m_gamePanel.setPuzzle(m_puzzle);
+				m_solver = new Solver(m_puzzle, m_gamePanel);
 				m_solveButton.setEnabled(false);
 				m_stopSolvingButton.setEnabled(true);
 				new Thread(m_solver).start();
